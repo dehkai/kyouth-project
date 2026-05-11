@@ -1,4 +1,6 @@
-from pathlib import Path 
+import sys
+from pathlib import Path
+
 from src.ingestor import ingest_all_mhtml
 # from src.processor import process_all_html
 # from src.loader import load_all_jsons
@@ -30,5 +32,16 @@ def run_bronze():
     output_dir = BRONZE_DIR
     ingest_all_mhtml(input_dir, output_dir)
     
-# def main():
-# 	# ORCHESTRATION TO BE IMPLEMENTED HERE
+def main() -> None:
+    commands = {
+        "ingest": run_bronze,
+        
+    }
+    if len(sys.argv) < 2 or sys.argv[1] not in commands:
+        print(f"Usage: python main.py [{' | '.join(commands)}]")
+        sys.exit(1)
+    commands[sys.argv[1]]()
+
+
+if __name__ == "__main__":
+    main()

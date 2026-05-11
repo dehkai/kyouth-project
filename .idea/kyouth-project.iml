@@ -3,6 +3,7 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/week_1/.venv" />
     </content>
     <orderEntry type="jdk" jdkName="uv (kyouth-project)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
