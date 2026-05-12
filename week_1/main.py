@@ -3,7 +3,7 @@ from pathlib import Path
 
 from src.ingestor import ingest_all_mhtml
 from src.processor import process_all_html
-# from src.loader import load_all_jsons
+from src.loader import load_all_jsons
 # from src.run_data_profile import run_data_profile
 
 SOURCE_DIR = Path("data/0_source")
@@ -36,6 +36,7 @@ def main() -> None:
     commands = {
         "ingest": run_bronze,
         "process": run_silver,
+        "load": run_gold,
     }
     if len(sys.argv) < 2 or sys.argv[1] not in commands:
         print(f"Usage: python main.py [{' | '.join(commands)}]")
