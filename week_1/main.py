@@ -4,7 +4,7 @@ from pathlib import Path
 from src.ingestor import ingest_all_mhtml
 from src.processor import process_all_html
 from src.loader import load_all_jsons
-# from src.run_data_profile import run_data_profile
+from src.profiler import run_data_profile
 
 SOURCE_DIR = Path("data/0_source")
 BRONZE_DIR = Path("data/1_bronze")
@@ -13,8 +13,15 @@ GOLD_DIR = Path("data/3_gold")
 DB_NAME = "jobs.db"
 
 def run_profiler():
-    db_path = GOLD_DIR/DB_NAME
+    db_path = GOLD_DIR / DB_NAME
     run_data_profile(db_path)
+
+
+def run_all():
+    run_bronze()
+    run_silver()
+    run_gold()
+    run_profiler()
 
 def run_gold():
     input_dir = SILVER_DIR
@@ -37,9 +44,11 @@ def main() -> None:
         "ingest": run_bronze,
         "process": run_silver,
         "load": run_gold,
+        "profile": run_profiler,
+        "all": run_all,
     }
     if len(sys.argv) < 2 or sys.argv[1] not in commands:
-        print(f"Usage: python main.py [{' | '.join(commands)}]")
+        print(f"Usage: python main.py [{'|'.join(commands)}]")
         sys.exit(1)
     commands[sys.argv[1]]()
 
