@@ -10,7 +10,7 @@ A local data pipeline that extracts job listings from raw `.mhtml` web archives,
 
 - macOS / Linux / Windows
 - [uv](https://docs.astral.sh/uv/) — Python package and environment manager
-- Python 3.13+
+- Python 3.14+
 
 ### 1. Install uv
 
