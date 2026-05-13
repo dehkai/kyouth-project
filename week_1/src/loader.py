@@ -2,21 +2,7 @@ import json
 import sqlite3
 from pathlib import Path
 
-
-CREATE_TABLE = """
-CREATE TABLE IF NOT EXISTS jobs (
-    source_id   TEXT PRIMARY KEY,
-    job_title   TEXT NOT NULL,
-    company     TEXT NOT NULL,
-    description TEXT NOT NULL,
-    tech_stack  TEXT
-);
-"""
-
-INSERT_JOB = """
-INSERT OR IGNORE INTO jobs (source_id, job_title, company, description)
-VALUES (?, ?, ?, ?);
-"""
+from src.utils import load_sql
 
 
 def load_all_jsons(input_dir: Path, output_dir: Path) -> None:
@@ -37,7 +23,7 @@ def load_all_jsons(input_dir: Path, output_dir: Path) -> None:
     db_path = output_dir / "jobs.db"
 
     conn = sqlite3.connect(db_path)
-    conn.execute(CREATE_TABLE)
+    conn.execute(load_sql("create_jobs_table.sql"))
     conn.commit()
 
     total = len(json_files)
@@ -47,7 +33,7 @@ def load_all_jsons(input_dir: Path, output_dir: Path) -> None:
     for json_path in json_files:
         data = json.loads(json_path.read_text(encoding="utf-8"))
         cursor = conn.execute(
-            INSERT_JOB,
+            load_sql("insert_job.sql"),
             (data["source_id"], data["job_title"], data["company"], data["description"]),
         )
         if cursor.rowcount == 1:

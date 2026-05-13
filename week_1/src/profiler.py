@@ -1,6 +1,8 @@
 import sqlite3
 from pathlib import Path
 
+from src.utils import load_sql
+
 
 def run_data_profile(db_path: Path) -> None:
     if not db_path.exists():
@@ -9,38 +11,20 @@ def run_data_profile(db_path: Path) -> None:
 
     conn = sqlite3.connect(db_path)
 
-    (total,) = conn.execute("SELECT COUNT(*) FROM jobs;").fetchone()
+    (total,) = conn.execute(load_sql("count_jobs.sql")).fetchone()
 
     (null_title, null_company, null_desc) = conn.execute(
-        """
-        SELECT
-            SUM(CASE WHEN job_title   IS NULL OR job_title   = '' THEN 1 ELSE 0 END),
-            SUM(CASE WHEN company     IS NULL OR company     = '' THEN 1 ELSE 0 END),
-            SUM(CASE WHEN description IS NULL OR description = '' THEN 1 ELSE 0 END)
-        FROM jobs;
-        """
+        load_sql("null_counts.sql")
     ).fetchone()
 
-    (avg_len,) = conn.execute(
-        "SELECT ROUND(AVG(LENGTH(description))) FROM jobs;"
-    ).fetchone()
+    (avg_len,) = conn.execute(load_sql("avg_description_length.sql")).fetchone()
 
     short_len, short_id, short_title = conn.execute(
-        """
-        SELECT LENGTH(description), source_id, job_title
-        FROM jobs
-        ORDER BY LENGTH(description) ASC
-        LIMIT 1;
-        """
+        load_sql("shortest_description.sql")
     ).fetchone()
 
     long_len, long_id, long_title = conn.execute(
-        """
-        SELECT LENGTH(description), source_id, job_title
-        FROM jobs
-        ORDER BY LENGTH(description) DESC
-        LIMIT 1;
-        """
+        load_sql("longest_description.sql")
     ).fetchone()
 
     conn.close()
