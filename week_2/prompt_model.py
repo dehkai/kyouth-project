@@ -23,15 +23,14 @@ def prompt_model(model: str, prompt: str) -> str:
 
 def _prompt_gemini(model: str, prompt: str) -> str:
     try:
-        import google.generativeai as genai
+        from google import genai
 
-        api_key = os.environ.get("GOOGLE_API_KEY")
+        api_key = os.environ.get("GEMINI_API") or os.environ.get("GOOGLE_API_KEY")
         if not api_key:
-            return "[Gemini Error] GOOGLE_API_KEY environment variable not set."
+            return "[Gemini Error] GEMINI_API environment variable not set."
 
-        genai.configure(api_key=api_key)
-        client = genai.GenerativeModel(model)
-        response = client.generate_content(prompt)
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(model=model, contents=prompt)
         return response.text
     except Exception as e:
         return f"[Gemini Error] {e}"
