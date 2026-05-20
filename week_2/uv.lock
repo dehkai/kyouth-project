@@ -458,6 +458,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "google-genai" },
     { name = "ollama" },
+    { name = "pydantic" },
     { name = "python-dotenv" },
 ]
 
@@ -465,5 +466,6 @@ dependencies = [
 requires-dist = [
     { name = "google-genai" },
     { name = "ollama" },
+    { name = "pydantic" },
     { name = "python-dotenv" },
 ]
