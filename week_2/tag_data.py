@@ -1,12 +1,11 @@
-import os
 import re
 import sqlite3
 import sys
 import time
 
-import ollama as ollama_client
 from dotenv import load_dotenv
-from google import genai
+
+from prompt_model import call_model
 
 load_dotenv()
 
@@ -15,9 +14,6 @@ MAX_RETRIES = 3
 RETRY_SLEEP = 2
 DESC_LIMIT = 800
 MODEL = "llama3.1"
-
-OLLAMA_MODELS = {"llama3.1", "phi3", "deepseek-r1:1.5b"}
-GEMINI_MODELS = {"gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3-flash-preview"}
 
 
 def _build_prompt(batch: list[tuple]) -> str:
@@ -57,29 +53,15 @@ def _parse_response(text: str, expected: int) -> list[str] | None:
     return results
 
 
-def _call_model(model: str, prompt: str, gemini_client: genai.Client | None) -> tuple[str, int]:
-    if model in GEMINI_MODELS:
-        response = gemini_client.models.generate_content(model=model, contents=prompt)
-        tokens = response.usage_metadata.total_token_count or 0
-        return response.text, tokens
-    response = ollama_client.chat(
-        model=model,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    tokens = (response.prompt_eval_count or 0) + (response.eval_count or 0)
-    return response.message.content, tokens
-
-
 def tag_data(db_url: str):
     start = time.time()
     total_tokens = 0
-    gemini_client = genai.Client(api_key=os.environ.get("GEMINI_API")) if MODEL in GEMINI_MODELS else None
 
     try:
         conn = sqlite3.connect(db_url)
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT source_id, description FROM jobs WHERE tech_stack IS NULL OR tech_stack = ''"
+            "SELECT source_id, description FROM jobs WHERE tech_stack IS NULL OR tech_stack = '' ORDER BY source_id"
         )
         rows = cursor.fetchall()
     except Exception as e:
@@ -100,7 +82,7 @@ def tag_data(db_url: str):
 
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                raw, tokens = _call_model(MODEL, prompt, gemini_client)
+                raw, tokens = call_model(MODEL, prompt)
                 total_tokens += tokens
                 tags = _parse_response(raw, len(batch))
                 if tags is not None:
